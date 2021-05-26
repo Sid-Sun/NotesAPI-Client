@@ -3,6 +3,7 @@ import { combine } from "zustand/middleware"
 import { API_URL } from "../../lib/constants"
 import { NoteType } from "../../types/NoteType"
 import { useTokenStore } from "../auth/useTokenStore"
+import { CreateNoteRequest } from '../../types/RequestTypes'
 
 const notesURL = `${API_URL}/notes`
 
@@ -26,13 +27,18 @@ const getNotesFromSever = async (): Promise<NoteType[]> => {
 const addNoteToServer = async (
   val: Omit<NoteType, "note_id">
 ): Promise<NoteType> => {
+  const reqData: CreateNoteRequest = {
+    name: val.name,
+    data: val.data,
+    folder_id: val.folder_id
+  }
   const retVal = {} as NoteType
   const req = await fetch(`${notesURL}/create`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${useTokenStore.getState().accessToken}`,
     },
-    body: `{"name": "${val.name}", "data": "${val.data}", "folder_id": ${val.folder_id}}`,
+    body: JSON.stringify(reqData),
   })
 
   if (req.status !== 200) return retVal
